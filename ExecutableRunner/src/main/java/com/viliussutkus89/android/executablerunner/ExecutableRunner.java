@@ -73,12 +73,12 @@ public class ExecutableRunner {
     return this;
   }
 
-  public ExecutableRunner SetStdout(@NonNull OutputStream stdout) {
+  public ExecutableRunner setStdout(@NonNull OutputStream stdout) {
     m_stdout = stdout;
     return this;
   }
 
-  public ExecutableRunner SetStderr(@NonNull OutputStream stderr) {
+  public ExecutableRunner setStderr(@NonNull OutputStream stderr) {
     m_stderr = stderr;
     return this;
   }
