@@ -32,7 +32,7 @@ jobs:
           mv ./releaseAssets/ExecutableRunner-release.aar ./ExecutableRunner/build/outputs/aar/
 
           mkdir --parents ./ExecutableRunner/build/libs
-          mv ./releaseAssets/ExecutableRunner-android-*-javadoc.jar ./ExecutableRunner/build/libs/
+          mv ./releaseAssets/ExecutableRunner-*-javadoc.jar ./ExecutableRunner/build/libs/
           mv ./releaseAssets/ExecutableRunner-android-*-sources.jar ./ExecutableRunner/build/libs/
 
       - name: Upload to Bintray
