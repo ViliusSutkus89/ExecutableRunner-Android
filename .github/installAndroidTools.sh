@@ -18,5 +18,5 @@ echo "y" | sudo $ANDROID_HOME/cmdline-tools/tools/bin/sdkmanager --licenses > /d
 
 echo "Installing cmake;$ANDROID_CMAKE"
 echo "y" | sudo $ANDROID_HOME/cmdline-tools/tools/bin/sdkmanager "cmake;$ANDROID_CMAKE" > /dev/null
-echo "Installing ndk;$ANDROID_NDK"
-echo "y" | sudo $ANDROID_HOME/cmdline-tools/tools/bin/sdkmanager "ndk;$ANDROID_NDK" > /dev/null
+#echo "Installing ndk;$ANDROID_NDK"
+#echo "y" | sudo $ANDROID_HOME/cmdline-tools/tools/bin/sdkmanager "ndk;$ANDROID_NDK" > /dev/null
