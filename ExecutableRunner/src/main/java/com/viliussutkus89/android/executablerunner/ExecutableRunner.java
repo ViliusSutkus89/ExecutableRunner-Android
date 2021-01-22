@@ -27,6 +27,8 @@ import androidx.annotation.NonNull;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -40,6 +42,9 @@ public class ExecutableRunner {
   private final File m_workingDirectory;
 
   private final Map<String, String> m_environment = new LinkedHashMap<>();
+
+  private OutputStream m_stdout;
+  private OutputStream m_stderr;
 
   public ExecutableRunner(@NonNull Context ctx, @NonNull String executableName) {
     m_executableName = executableName;
@@ -68,6 +73,16 @@ public class ExecutableRunner {
     return this;
   }
 
+  public ExecutableRunner SetStdout(@NonNull OutputStream stdout) {
+    m_stdout = stdout;
+    return this;
+  }
+
+  public ExecutableRunner SetStderr(@NonNull OutputStream stderr) {
+    m_stderr = stderr;
+    return this;
+  }
+
   public int run(String ... arguments) throws IOException {
     Log.v(m_executableName, "Attempting to run executable " + m_executableName);
 
@@ -80,8 +95,11 @@ public class ExecutableRunner {
     args.addAll(Arrays.asList(arguments));
 
     ProcessBuilder processBuilder = new ProcessBuilder(args)
-        .directory(m_workingDirectory)
-        .redirectErrorStream(true);
+        .directory(m_workingDirectory);
+
+    if (m_stdout == m_stderr) {
+      processBuilder.redirectErrorStream(true);
+    }
 
     if (0 < this.m_environment.size()) {
       final Map<String, String> environment = processBuilder.environment();
@@ -93,10 +111,19 @@ public class ExecutableRunner {
     Process process = processBuilder.start();
     int retVal = ProcessWaitForLoop(process);
 
-    Scanner s = new Scanner(process.getInputStream()).useDelimiter("\n");
-    while (s.hasNext()) {
-      Log.i(m_executableName, s.next());
+    if (null == m_stdout) {
+      Scanner s = new Scanner(process.getInputStream()).useDelimiter("\n");
+      while (s.hasNext()) {
+        Log.i(m_executableName, s.next());
+      }
+    } else {
+      writeStreamToFile(process.getInputStream(), m_stdout);
     }
+
+    if (null != m_stderr && m_stdout != m_stderr) {
+      writeStreamToFile(process.getErrorStream(), m_stderr);
+    }
+
     return retVal;
   }
 
@@ -107,6 +134,14 @@ public class ExecutableRunner {
         return p.waitFor();
       } catch (InterruptedException ignored) {
       }
+    }
+  }
+
+  private static void writeStreamToFile(InputStream stream, OutputStream out) throws IOException {
+    int bytesRead;
+    byte[] buff = new byte[16 * 1024];
+    while (-1 < (bytesRead = stream.read(buff))) {
+      out.write(buff, 0, bytesRead);
     }
   }
 }
