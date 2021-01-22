@@ -29,7 +29,7 @@ jobs:
         run: |
           ls -lha ./releaseAssets
           mkdir --parents ./ExecutableRunner/build/outputs/aar
-          mv ./releaseAssets/ExecutableRunner-android-release.aar ./ExecutableRunner/build/outputs/aar/
+          mv ./releaseAssets/ExecutableRunner-release.aar ./ExecutableRunner/build/outputs/aar/
 
           mkdir --parents ./ExecutableRunner/build/libs
           mv ./releaseAssets/ExecutableRunner-android-*-javadoc.jar ./ExecutableRunner/build/libs/

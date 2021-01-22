@@ -41,8 +41,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./ExecutableRunner/build/outputs/aar/ExecutableRunner-android-release.aar
-          asset_name: ExecutableRunner-android-release.aar
+          asset_path: ./ExecutableRunner/build/outputs/aar/ExecutableRunner-release.aar
+          asset_name: ExecutableRunner-release.aar
           asset_content_type: application/zip
 
       - name: Generate javadoc
