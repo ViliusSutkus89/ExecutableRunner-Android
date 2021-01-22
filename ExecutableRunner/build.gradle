@@ -1,0 +1,118 @@
+plugins {
+    id 'com.android.library'
+    id 'com.jfrog.bintray'
+    id 'maven-publish'
+}
+
+version = '1.0.0'
+group = 'com.viliussutkus89'
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 30
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation 'androidx.annotation:annotation:1.1.0'
+}
+
+task sourceJar(type: Jar) {
+    into ("", { from android.sourceSets.main.java.srcDirs} )
+    archiveBaseName = rootProject.name
+    archiveClassifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    options.encoding = 'UTF-8'
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    title = "${rootProject.name} ${project.version} API"
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+bintray {
+    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
+
+    publications = ['projectRelease']
+
+    pkg {
+        repo = 'maven-repo'
+        name = rootProject.name
+        desc = 'Run standalone (console) executables on Android'
+
+        websiteUrl = 'https://github.com/ViliusSutkus89/ExecutableRunner-Android'
+        vcsUrl = 'https://github.com/ViliusSutkus89/ExecutableRunner-Android.git'
+        issueTrackerUrl = 'https://github.com/ViliusSutkus89/ExecutableRunner-Android/issues'
+
+        licenses = ['GPL-3.0-only']
+        labels = ['executable', 'runner', 'android', 'library', 'cli']
+
+        publish = true
+
+        version {
+            name = this.version
+            released = new Date()
+            vcsTag = "v${this.version}"
+        }
+    }
+}
+
+publishing {
+    publications {
+        projectRelease(MavenPublication) {
+            artifactId rootProject.name
+            artifact "$buildDir/outputs/aar/${rootProject.name}-release.aar"
+            artifact sourceJar
+            artifact javadocJar
+            pom {
+                packaging = 'aar'
+                url = 'https://github.com/ViliusSutkus89/ExecutableRunner-Android'
+                inceptionYear = '2020'
+                licenses {
+                    license {
+                        name = 'The GNU General Public License, Version 3'
+                        url = 'https://www.gnu.org/licenses/gpl-3.0.txt'
+                        distribution = 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id = "ViliusSutkus89"
+                        name = "Vilius Sutkus"
+                        email = "ViliusSutkus89@gmail.com"
+                    }
+                }
+                scm {
+                    url = 'https://github.com/ViliusSutkus89/ExecutableRunner-Android'
+                    connection = 'https://github.com/ViliusSutkus89/ExecutableRunner-Android.git'
+                }
+            }
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+                // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each
+                configurations.implementation.allDependencies.each {
+                    // Ensure dependencies such as fileTree are not included in the pom.
+                    if (it.name != 'unspecified') {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,6 @@
+#ifndef EXECUTABLERUNNER_NATIVELIB_H
+#define EXECUTABLERUNNER_NATIVELIB_H
+
+extern "C" int integerDoubler(int input);
+
+#endif //EXECUTABLERUNNER_NATIVELIB_H
