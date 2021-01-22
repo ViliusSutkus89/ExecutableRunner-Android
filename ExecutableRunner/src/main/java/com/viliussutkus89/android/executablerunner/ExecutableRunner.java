@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.viliussutkus89.executablerunner;
+package com.viliussutkus89.android.executablerunner;
 
 import android.content.Context;
 import android.util.Log;

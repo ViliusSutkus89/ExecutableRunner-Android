@@ -1,4 +1,4 @@
-package com.viliussutkus89.executablerunner;
+package com.viliussutkus89.android.executablerunner;
 
 import android.content.Context;
 
