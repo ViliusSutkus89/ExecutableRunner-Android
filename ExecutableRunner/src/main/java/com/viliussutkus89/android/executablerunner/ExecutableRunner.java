@@ -84,15 +84,19 @@ public class ExecutableRunner {
   }
 
   public int run(String ... arguments) throws IOException {
+    return run(Arrays.asList(arguments));
+  }
+
+  public int run(List<String> arguments) throws IOException {
     Log.v(m_executableName, "Attempting to run executable " + m_executableName);
 
     if (!m_executable.exists()) {
       throw new FileNotFoundException("Executable " + m_executable.getAbsolutePath() + " not found!");
     }
 
-    List<String> args = new ArrayList<>(1 + arguments.length);
+    List<String> args = new ArrayList<>(1 + arguments.size());
     args.add(m_executable.getAbsolutePath());
-    args.addAll(Arrays.asList(arguments));
+    args.addAll(arguments);
 
     ProcessBuilder processBuilder = new ProcessBuilder(args)
         .directory(m_workingDirectory);
