@@ -1,2 +1,0 @@
-Distribute library through MavenCentral
-
