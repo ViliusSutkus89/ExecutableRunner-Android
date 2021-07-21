@@ -1,0 +1,128 @@
+#  MIT License
+#
+#  Copyright (c) 2021 Vilius Sutkus <ViliusSutkus89@gmail.com>
+#
+#  https://github.com/ViliusSutkus89/Sample_Android_Library-MavenCentral-Instrumented_Tests
+#  .github/workflows/unprivilegedBuild.yml - v1.1.5
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to deal
+#  in the Software without restriction, including without limitation the rights
+#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#  copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in all
+#  copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#  SOFTWARE.
+
+name: unprivilegedBuild
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore: [ master, main ]
+    paths-ignore:
+      - '**.md'
+      - '.github/workflows/manualVersionIncrement*.yml'
+      - '.github/workflows/privilegedBuild.yml'
+
+permissions:
+  actions: none
+  checks: none
+  contents: none
+  deployments: none
+  issues: none
+  packages: none
+  pull-requests: none
+  repository-projects: none
+  security-events: none
+  statuses: none
+
+env:
+  ANDROID_NDK:        "22.0.7026061"
+  ANDROID_CMAKE:      "3.10.2.4988404"
+
+jobs:
+  buildLibrary:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2
+        with:
+          distribution: zulu
+          java-version: 8
+      - uses: android-actions/setup-android@v2
+
+      - run: ./gradlew build
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: library-lint-report.html
+          path: ExecutableRunner/build/reports/lint-results.html
+
+      - run: ./gradlew publishToMavenLocal
+      - uses: actions/upload-artifact@v2
+        with:
+          name: maven-local
+          path: ~/.m2
+
+  runInstrumentedTests:
+    needs: buildLibrary
+    # Only macos VMs are available with exposed CPU extensions to run hardware accelerated emulator
+    runs-on: macos-10.15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Oldest API supported by NDK
+          - arch: x86
+            api-level: 16
+            api-type-target: default
+          # Oldest x86_64 image
+          - arch: x86_64
+            api-level: 21
+            api-type-target: default
+          # Latest x86 image
+          - arch: x86
+            api-level: 30
+            api-type-target: google_apis
+          # Latest image
+          - arch: x86_64
+            api-level: 31
+            api-type-target: google_apis
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2
+        with:
+          distribution: zulu
+          java-version: 8
+      - uses: android-actions/setup-android@v2
+      - run: sdkmanager "ndk;${{env.ANDROID_NDK}}" "cmake;${{env.ANDROID_CMAKE}}"
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: maven-local
+          path: ~/.m2
+
+      - name: Prepare library to run instrumented tests on staging library
+        run: ./ci-scripts/prepareLibraryTestsForStagingRepository tests --output=build/lib-staging --repository=mavenLocal
+
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: ${{ matrix.arch }}
+          target: ${{ matrix.api-type-target }}
+          script: ./gradlew connectedCheck
+          working-directory: build/lib-staging
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: instrumentedTestsReport-${{ matrix.api-level }}-${{ matrix.arch }}
+          path: build/lib-staging/lib/build/reports/androidTests/connected
