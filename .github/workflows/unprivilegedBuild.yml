@@ -106,7 +106,7 @@ jobs:
       - uses: android-actions/setup-android@v2
       - run: sdkmanager "ndk;${{env.ANDROID_NDK}}" "cmake;${{env.ANDROID_CMAKE}}"
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: maven-local
           path: ~/.m2
