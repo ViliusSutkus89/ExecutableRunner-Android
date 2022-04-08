@@ -87,13 +87,13 @@ jobs:
           SIGNING_PASS: ${{ secrets.SIGNING_PASS }}
 
       - run: tar -cvf maven-local.tar ~/.m2
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: maven-local.tar
           path: maven-local.tar
 
       - run: mv ExecutableRunner/build/reports/lint-results.html ExecutableRunner/build/reports/library-lint-results.html
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: library-lint-results.html
           path: ExecutableRunner/build/reports/library-lint-results.html
@@ -142,7 +142,7 @@ jobs:
           working-directory: build/lib-staging
 
       - run: tar -cvf instrumentedTestsReport-${{ matrix.api-level }}-${{ matrix.arch }}.tar build/lib-staging/tests/build/reports/androidTests/connected
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: instrumentedTestsReport-${{ matrix.api-level }}-${{ matrix.arch }}.tar
           path: instrumentedTestsReport-${{ matrix.api-level }}-${{ matrix.arch }}.tar
