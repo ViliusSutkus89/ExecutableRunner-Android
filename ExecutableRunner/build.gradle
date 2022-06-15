@@ -29,7 +29,7 @@ configurations {
 }
 
 dependencies {
-    implementation 'androidx.annotation:annotation:1.2.0'
+    implementation 'androidx.annotation:annotation:1.4.0'
     javadocDependenciesToObtainClasspath 'androidx.annotation:annotation:1.2.0'
 }
 
