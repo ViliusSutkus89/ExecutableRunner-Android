@@ -53,7 +53,7 @@ jobs:
   buildLibrary:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3.1.0
       - uses: actions/setup-java@v2
         with:
           distribution: zulu
@@ -98,7 +98,7 @@ jobs:
             api-level: 31
             api-type-target: google_apis
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3.1.0
       - uses: actions/setup-java@v2
         with:
           distribution: zulu
